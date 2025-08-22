@@ -139,68 +139,71 @@
   </script>
 
   <script>
-    // TODO: Replace with your actual Firebase project config from the Firebase Console
-    const firebaseConfig = {
-      apiKey: "AIzaSyBL55nh3Tox5RCMg0NEdhduBuK1IcvpJQQ",
-      authDomain: "quiz-game-8cd1f.firebaseapp.com",
-      databaseURL: "https://quiz-game-8cd1f-default-rtdb.firebaseio.com",
-      projectId: "quiz-game-8cd1f",
-      storageBucket: "quiz-game-8cd1f.firebasestorage.app",
-      messagingSenderId: "849501942718",
-      appId: "1:849501942718:web:855ecac0534a08ccfbffef",
-      measurementId: "G-RNZCVXSYKK"
-    };
+  // 1️⃣ Firebase config
+  const firebaseConfig = {
+    apiKey: "AIzaSyBL55nh3Tox5RCMg0NEdhduBuK1IcvpJQQ",
+    authDomain: "quiz-game-8cd1f.firebaseapp.com",
+    databaseURL: "https://quiz-game-8cd1f-default-rtdb.firebaseio.com",
+    projectId: "quiz-game-8cd1f",
+    storageBucket: "quiz-game-8cd1f.firebasestorage.app",
+    messagingSenderId: "849501942718",
+    appId: "1:849501942718:web:855ecac0534a08ccfbffef",
+    measurementId: "G-RNZCVXSYKK"
+  };
 
-    // Initialize Firebase (compat API)
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
-    
-    // Save a score to Firebase
-function saveScore(name, score) {
-  console.log("🔹 Saving score...", { name, score });
+  // 2️⃣ Initialize Firebase
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
 
-  db.ref("scores").push({
-    name: name,
-    score: score,
-    timestamp: Date.now()
-  })
-  .then(() => {
-    console.log("✅ Score saved successfully!");
-    loadScores(); // reload after saving
-  })
-  .catch((error) => {
-    console.error("❌ Error saving score:", error);
-  });
-}
+  // 3️⃣ Save a score
+  function saveScore(name, score) {
+    console.log("🔹 Saving score...", { name, score });
 
-// Load scores from Firebase
-function loadScores() {
-  console.log("🔹 Loading scores from Firebase...");
+    db.ref("scores").push({
+      name: name,
+      score: score,
+      timestamp: Date.now()
+    })
+    .then(() => {
+      console.log("✅ Score saved successfully!");
+      loadScores(); // Reload scoreboard after saving
+    })
+    .catch((error) => {
+      console.error("❌ Error saving score:", error);
+    });
+  }
 
-  const scoresRef = db.ref("scores").orderByChild("score").limitToLast(10);
+  // 4️⃣ Load scores
+  function loadScores() {
+    const scoresRef = db.ref("scores").orderByChild("score").limitToLast(10);
 
-  scoresRef.on("value", (snapshot) => {
-    if (!snapshot.exists()) {
-      console.log("⚠️ No scores found in database.");
-      document.getElementById("scoreboard").innerHTML =
-        "<h2>🏆 Scoreboard</h2><p>No scores yet.</p>";
-      return;
-    }
+    scoresRef.on("value", (snapshot) => {
+      if (!snapshot.exists()) {
+        document.getElementById("scoreboard").innerHTML =
+          "<h2>🏆 Scoreboard</h2><p>No scores yet.</p>";
+        return;
+      }
 
-    console.log("📥 Raw snapshot data:", snapshot.val());
+      const items = [];
+      snapshot.forEach((child) => items.push(child.val()));
+      items.reverse(); // highest score first
 
-    const items = [];
-    snapshot.forEach((child) => items.push(child.val())); // ascending order
-    items.reverse(); // highest first
+      // Build HTML
+      let html = "<h2>🏆 Scoreboard</h2><ol>";
+      items.forEach((item) => {
+        html += `<li>${item.name}: ${item.score}</li>`;
+      });
+      html += "</ol>";
 
-    console.log("✅ Processed scores:", items);
+      document.getElementById("scoreboard").innerHTML = html;
+    });
+  }
 
-    // Build H
+  // 5️⃣ Load scoreboard when page loads
+  window.addEventListener("load", loadScores);
+</script>
 
-
-    // Load scores on page open
-    loadScores();
-  </script>
 </body>
 </html>
+
 
