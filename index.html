@@ -4,8 +4,6 @@
   <meta charset="UTF-8" />
   <title>Ojas vs Dhruv Quiz Game</title>
   <link rel="stylesheet" href="style.css" />
-
-  <!-- Firebase SDK (compat builds so firebase.initializeApp / firebase.database work) -->
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 </head>
@@ -45,10 +43,26 @@
     <button onclick="restartGame()">Play Again</button>
   </div>
 
-  <!-- Scoreboard (kept outside of any <script>) -->
+  <!-- Scoreboard -->
   <div id="scoreboard"></div>
 
   <script>
+    // Firebase config
+    const firebaseConfig = {
+      apiKey: "AIzaSyBL55nh3Tox5RCMg0NEdhduBuK1IcvpJQQ",
+      authDomain: "quiz-game-8cd1f.firebaseapp.com",
+      databaseURL: "https://quiz-game-8cd1f-default-rtdb.firebaseio.com",
+      projectId: "quiz-game-8cd1f",
+      storageBucket: "quiz-game-8cd1f.firebasestorage.app",
+      messagingSenderId: "849501942718",
+      appId: "1:849501942718:web:855ecac0534a08ccfbffef",
+      measurementId: "G-RNZCVXSYKK"
+    };
+
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
     const questions = [
       "Who looks better?",
       "Who is smarter?",
@@ -80,16 +94,14 @@
     function loadQuestion() {
       if (currentQuestion < questions.length) {
         document.getElementById("question").innerText = questions[currentQuestion];
-        document.getElementById("progress").innerText = `${playerName}, Question ${
-          currentQuestion + 1
-        } of ${questions.length}`;
+        document.getElementById("progress").innerText = `${playerName}, Question ${currentQuestion + 1} of ${questions.length}`;
       } else {
         showResult();
       }
     }
 
     function vote(person) {
-      scores[person]++; // person is 'Ojas' or 'Dhruv'
+      scores[person]++;
       currentQuestion++;
       loadQuestion();
     }
@@ -102,29 +114,17 @@
       resultText += `OJAS: ${scores.Ojas}<br>DHRUV: ${scores.Dhruv}<br><br>`;
 
       let winnerCardHTML = "";
-
       if (scores.Ojas > scores.Dhruv) {
-        winnerCardHTML = `
-          <div class="winner-card">
-            <img src="images/ojas.jpeg" alt="Ojas" />
-            🏆 OJAS Wins!
-          </div>`;
+        winnerCardHTML = `<div class="winner-card"><img src="images/ojas.jpeg" alt="Ojas" /> 🏆 OJAS Wins!</div>`;
       } else if (scores.Dhruv > scores.Ojas) {
-        winnerCardHTML = `
-          <div class="winner-card">
-            <img src="images/dhruv.png" alt="Dhruv" />
-            🏆 DHRUV Wins!
-          </div>`;
+        winnerCardHTML = `<div class="winner-card"><img src="images/dhruv.png" alt="Dhruv" /> 🏆 DHRUV Wins!</div>`;
       } else {
-        winnerCardHTML = `
-          <div class="winner-card" style="background: #555;">
-            🤝 It's a Tie!
-          </div>`;
+        winnerCardHTML = `<div class="winner-card" style="background: #555;">🤝 It's a Tie!</div>`;
       }
 
       document.getElementById("result").innerHTML = resultText + winnerCardHTML;
 
-      // Save both Ojas & Dhruv scores under this player's run
+      // Save scores safely
       saveScore(playerName + " (Ojas)", scores.Ojas);
       saveScore(playerName + " (Dhruv)", scores.Dhruv);
     }
@@ -136,74 +136,53 @@
       document.getElementById("start-box").style.display = "block";
       document.getElementById("playerName").value = "";
     }
+
+    // ---- Firebase functions ----
+
+    function saveScore(name, score) {
+      if (!name || typeof score !== "number") return;
+
+      db.ref("scores").push({
+        name: name,
+        score: score,
+        timestamp: Date.now()
+      })
+      .then(() => {
+        console.log("Score saved:", name, score);
+        loadScores();
+      })
+      .catch(err => console.error("Error saving score:", err));
+    }
+
+    function loadScores() {
+      db.ref("scores").get().then(snapshot => {
+        if (!snapshot.exists()) {
+          document.getElementById("scoreboard").innerHTML = "<p>No scores yet</p>";
+          return;
+        }
+
+        const items = [];
+        snapshot.forEach(child => {
+          const val = child.val();
+          if (val && typeof val.score === "number") items.push(val);
+        });
+
+        // Sort descending and take top 10
+        items.sort((a,b) => b.score - a.score);
+        const top10 = items.slice(0,10);
+
+        let html = "<h2>🏆 Scoreboard - Top 10</h2><ol>";
+        top10.forEach(item => {
+          html += `<li>${item.name}: ${item.score}</li>`;
+        });
+        html += "</ol>";
+
+        document.getElementById("scoreboard").innerHTML = html;
+      }).catch(err => console.error("Error loading scores:", err));
+    }
+
+    // Load scoreboard on page load
+    window.addEventListener("load", loadScores);
   </script>
-
-  <script>
-  // 1️⃣ Firebase config
-  const firebaseConfig = {
-    apiKey: "AIzaSyBL55nh3Tox5RCMg0NEdhduBuK1IcvpJQQ",
-    authDomain: "quiz-game-8cd1f.firebaseapp.com",
-    databaseURL: "https://quiz-game-8cd1f-default-rtdb.firebaseio.com",
-    projectId: "quiz-game-8cd1f",
-    storageBucket: "quiz-game-8cd1f.firebasestorage.app",
-    messagingSenderId: "849501942718",
-    appId: "1:849501942718:web:855ecac0534a08ccfbffef",
-    measurementId: "G-RNZCVXSYKK"
-  };
-
-  // 2️⃣ Initialize Firebase
-  firebase.initializeApp(firebaseConfig);
-  const db = firebase.database();
-
-  // 3️⃣ Save a score
-  function saveScore(name, score) {
-    console.log("🔹 Saving score...", { name, score });
-
-    db.ref("scores").push({
-      name: name,
-      score: score,
-      timestamp: Date.now()
-    })
-    .then(() => {
-      console.log("✅ Score saved successfully!");
-      loadScores(); // Reload scoreboard after saving
-    })
-    .catch((error) => {
-      console.error("❌ Error saving score:", error);
-    });
-  }
-
-  // 4️⃣ Load scores
-  function loadScores() {
-    const scoresRef = db.ref("scores").orderByChild("score").limitToLast(10);
-
-    scoresRef.on("value", (snapshot) => {
-      if (!snapshot.exists()) {
-        document.getElementById("scoreboard").innerHTML =
-          "<h2>🏆 Scoreboard</h2><p>No scores yet.</p>";
-        return;
-      }
-
-      const items = [];
-      snapshot.forEach((child) => items.push(child.val()));
-      items.reverse(); // highest score first
-
-      // Build HTML
-      let html = "<h2>🏆 Scoreboard</h2><ol>";
-      items.forEach((item) => {
-        html += `<li>${item.name}: ${item.score}</li>`;
-      });
-      html += "</ol>";
-
-      document.getElementById("scoreboard").innerHTML = html;
-    });
-  }
-
-  // 5️⃣ Load scoreboard when page loads
-  window.addEventListener("load", loadScores);
-</script>
-
 </body>
 </html>
-
-
