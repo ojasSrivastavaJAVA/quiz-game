@@ -4,6 +4,12 @@
   <meta charset="UTF-8">
   <title>Ojas vs Dhruv Quiz Game</title>
   <link rel="stylesheet" href="style.css">
+  <!-- Firebase App -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"></script>
+
+  <!-- Firebase Realtime Database -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js"></script>
+
 </head>
 <body>
   <h1>Ojas vs Dhruv - Quiz Game</h1>
@@ -85,6 +91,9 @@
       currentQuestion++;
       loadQuestion();
     }
+    
+    <div id="scoreboard"></div>
+
 
     function showResult() {
       document.getElementById("question-box").style.display = "none";
@@ -115,6 +124,13 @@
       }
 
       document.getElementById("result").innerHTML = resultText + winnerCardHTML;
+        // save Ojas score
+      saveScore(playerName + " (Ojas)", scores.Ojas);
+
+        // save Dhruv score
+      saveScore(playerName + " (Dhruv)", scores.Dhruv);
+
+
     }
 
 
@@ -126,7 +142,52 @@
       document.getElementById("playerName").value = "";
     }
   </script>
+  <script>
+  // Paste your firebaseConfig here
+  const firebaseConfig = {
+    apiKey: "YOUR_API_KEY",
+    authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+    databaseURL: "https://YOUR_PROJECT_ID-default-rtdb.firebaseio.com",
+    projectId: "YOUR_PROJECT_ID",
+    storageBucket: "YOUR_PROJECT_ID.appspot.com",
+    messagingSenderId: "YOUR_SENDER_ID",
+    appId: "YOUR_APP_ID"
+  };
+
+  // Initialize Firebase
+  const app = firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
+
+  // Save player score
+  function saveScore(playerName, score) {
+    const scoresRef = db.ref("scores");
+    scoresRef.push({
+      name: playerName,
+      score: score,
+      time: Date.now()
+    });
+  }
+
+  // Load top scores
+  function loadScores() {
+    const scoresRef = db.ref("scores").orderByChild("score").limitToLast(10);
+    scoresRef.on("value", (snapshot) => {
+      const scores = snapshot.val();
+      let html = "<h2>🏆 Scoreboard</h2><ul>";
+      for (let key in scores) {
+        html += `<li>${scores[key].name}: ${scores[key].score}</li>`;
+      }
+      html += "</ul>";
+      document.getElementById("scoreboard").innerHTML = html;
+    });
+  }
+
+  // Load scores when page opens
+  loadScores();
+</script>
+
 </body>
 </html>
+
 
 
