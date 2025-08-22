@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Ojas vs Dhruv Quiz Game</title>
-  <link rel="stylesheet" href="style.css">
-  <!-- Firebase App -->
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"></script>
-  <!-- Firebase Realtime Database -->
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js"></script>
+  <link rel="stylesheet" href="style.css" />
+
+  <!-- Firebase SDK (compat builds so firebase.initializeApp / firebase.database work) -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 </head>
 <body>
   <h1>Ojas vs Dhruv - Quiz Game</h1>
@@ -15,17 +15,17 @@
   <!-- Start screen -->
   <div class="start-box" id="start-box">
     <h2>Enter your name to start playing</h2>
-    <input type="text" id="playerName" placeholder="Your Name">
-    <br><br>
+    <input type="text" id="playerName" placeholder="Your Name" />
+    <br /><br />
     <button onclick="startGame()">Start Game</button>
   </div>
 
   <!-- Quiz questions -->
-  <div class="question-box" id="question-box" style="display:none;">
+  <div class="question-box" id="question-box" style="display: none;">
     <h2 id="question">Question will appear here</h2>
     <div>
-      <img id="ojas-img" src="images/ojas.jpeg" alt="Ojas">
-      <img id="dhruv-img" src="images/dhruv.png" alt="Dhruv">
+      <img id="ojas-img" src="images/ojas.jpeg" alt="Ojas" />
+      <img id="dhruv-img" src="images/dhruv.png" alt="Dhruv" />
     </div>
     <div>
       <button onclick="vote('Ojas')">Vote OJAS</button>
@@ -35,17 +35,17 @@
   </div>
 
   <!-- Result screen -->
-  <div class="result-box" id="result-box" style="display:none;">
+  <div class="result-box" id="result-box" style="display: none;">
     <h2>Results</h2>
     <div>
-      <img id="ojas-final" src="images/ojas.jpeg" alt="Ojas">
-      <img id="dhruv-final" src="images/dhruv.png" alt="Dhruv">
+      <img id="ojas-final" src="images/ojas.jpeg" alt="Ojas" />
+      <img id="dhruv-final" src="images/dhruv.png" alt="Dhruv" />
     </div>
     <div id="result"></div>
     <button onclick="restartGame()">Play Again</button>
   </div>
 
-  <!-- Scoreboard (placed OUTSIDE script) -->
+  <!-- Scoreboard (kept outside of any <script>) -->
   <div id="scoreboard"></div>
 
   <script>
@@ -59,7 +59,7 @@
       "Who is better at sports?",
       "Who is more creative?",
       "Who has a better smile?",
-      "Who would you trust more?"
+      "Who would you trust more?",
     ];
 
     let currentQuestion = 0;
@@ -80,14 +80,16 @@
     function loadQuestion() {
       if (currentQuestion < questions.length) {
         document.getElementById("question").innerText = questions[currentQuestion];
-        document.getElementById("progress").innerText = `${playerName}, Question ${currentQuestion+1} of ${questions.length}`;
+        document.getElementById("progress").innerText = `${playerName}, Question ${
+          currentQuestion + 1
+        } of ${questions.length}`;
       } else {
         showResult();
       }
     }
 
     function vote(person) {
-      scores[person]++;
+      scores[person]++; // person is 'Ojas' or 'Dhruv'
       currentQuestion++;
       loadQuestion();
     }
@@ -104,13 +106,13 @@
       if (scores.Ojas > scores.Dhruv) {
         winnerCardHTML = `
           <div class="winner-card">
-            <img src="images/ojas.jpeg" alt="Ojas">
+            <img src="images/ojas.jpeg" alt="Ojas" />
             🏆 OJAS Wins!
           </div>`;
       } else if (scores.Dhruv > scores.Ojas) {
         winnerCardHTML = `
           <div class="winner-card">
-            <img src="images/dhruv.png" alt="Dhruv">
+            <img src="images/dhruv.png" alt="Dhruv" />
             🏆 DHRUV Wins!
           </div>`;
       } else {
@@ -122,10 +124,8 @@
 
       document.getElementById("result").innerHTML = resultText + winnerCardHTML;
 
-      // save Ojas score
+      // Save both Ojas & Dhruv scores under this player's run
       saveScore(playerName + " (Ojas)", scores.Ojas);
-
-      // save Dhruv score
       saveScore(playerName + " (Dhruv)", scores.Dhruv);
     }
 
@@ -139,48 +139,51 @@
   </script>
 
   <script>
-  // Paste your firebaseConfig here
-  const firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-    databaseURL: "https://YOUR_PROJECT_ID-default-rtdb.firebaseio.com",
-    projectId: "YOUR_PROJECT_ID",
-    storageBucket: "YOUR_PROJECT_ID.appspot.com",
-    messagingSenderId: "YOUR_SENDER_ID",
-    appId: "YOUR_APP_ID"
-  };
+    // TODO: Replace with your actual Firebase project config from the Firebase Console
+    const firebaseConfig = {
+      apiKey: "AIzaSyBL55nh3Tox5RCMg0NEdhduBuK1IcvpJQQ",
+      authDomain: "quiz-game-8cd1f.firebaseapp.com",
+      databaseURL: "https://quiz-game-8cd1f-default-rtdb.firebaseio.com",
+      projectId: "quiz-game-8cd1f",
+      storageBucket: "quiz-game-8cd1f.firebasestorage.app",
+      messagingSenderId: "849501942718",
+      appId: "1:849501942718:web:855ecac0534a08ccfbffef",
+      measurementId: "G-RNZCVXSYKK"
+    };
 
-  // Initialize Firebase
-  const app = firebase.initializeApp(firebaseConfig);
-  const db = firebase.database();
+    // Initialize Firebase (compat API)
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
 
-  // Save player score
-  function saveScore(playerName, score) {
-    const scoresRef = db.ref("scores");
-    scoresRef.push({
-      name: playerName,
-      score: score,
-      time: Date.now()
-    });
-  }
+    // Save player score
+    function saveScore(playerName, score) {
+      const scoresRef = db.ref("scores");
+      scoresRef.push({ name: playerName, score: score, time: Date.now() });
+    }
 
-  // Load top scores
-  function loadScores() {
-    const scoresRef = db.ref("scores").orderByChild("score").limitToLast(10);
-    scoresRef.on("value", (snapshot) => {
-      const scores = snapshot.val();
-      let html = "<h2>🏆 Scoreboard</h2><ul>";
-      for (let key in scores) {
-        html += `<li>${scores[key].name}: ${scores[key].score}</li>`;
-      }
-      html += "</ul>";
-      document.getElementById("scoreboard").innerHTML = html;
-    });
-  }
+    // Load top scores (highest first)
+    function loadScores() {
+      const scoresRef = db.ref("scores").orderByChild("score").limitToLast(10);
+      scoresRef.on("value", (snapshot) => {
+        if (!snapshot.exists()) {
+          document.getElementById("scoreboard").innerHTML =
+            "<h2>🏆 Scoreboard</h2><p>No scores yet.</p>";
+          return;
+        }
+        const items = [];
+        snapshot.forEach((child) => items.push(child.val())); // ascending
+        items.reverse(); // show highest first
+        let html = "<h2>🏆 Scoreboard</h2><ol>";
+        items.forEach((row) => {
+          html += `<li>${row.name}: ${row.score}</li>`;
+        });
+        html += "</ol>";
+        document.getElementById("scoreboard").innerHTML = html;
+      });
+    }
 
-  // Load scores when page opens
-  loadScores();
+    // Load scores on page open
+    loadScores();
   </script>
-
 </body>
 </html>
