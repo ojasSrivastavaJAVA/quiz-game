@@ -154,36 +154,53 @@
     // Initialize Firebase (compat API)
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
+    
+    // Save a score to Firebase
+function saveScore(name, score) {
+  console.log("🔹 Saving score...", { name, score });
 
-    // Save player score
-    function saveScore(playerName, score) {
-      const scoresRef = db.ref("scores");
-      scoresRef.push({ name: playerName, score: score, time: Date.now() });
+  db.ref("scores").push({
+    name: name,
+    score: score,
+    timestamp: Date.now()
+  })
+  .then(() => {
+    console.log("✅ Score saved successfully!");
+    loadScores(); // reload after saving
+  })
+  .catch((error) => {
+    console.error("❌ Error saving score:", error);
+  });
+}
+
+// Load scores from Firebase
+function loadScores() {
+  console.log("🔹 Loading scores from Firebase...");
+
+  const scoresRef = db.ref("scores").orderByChild("score").limitToLast(10);
+
+  scoresRef.on("value", (snapshot) => {
+    if (!snapshot.exists()) {
+      console.log("⚠️ No scores found in database.");
+      document.getElementById("scoreboard").innerHTML =
+        "<h2>🏆 Scoreboard</h2><p>No scores yet.</p>";
+      return;
     }
 
-    // Load top scores (highest first)
-    function loadScores() {
-      const scoresRef = db.ref("scores").orderByChild("score").limitToLast(10);
-      scoresRef.on("value", (snapshot) => {
-        if (!snapshot.exists()) {
-          document.getElementById("scoreboard").innerHTML =
-            "<h2>🏆 Scoreboard</h2><p>No scores yet.</p>";
-          return;
-        }
-        const items = [];
-        snapshot.forEach((child) => items.push(child.val())); // ascending
-        items.reverse(); // show highest first
-        let html = "<h2>🏆 Scoreboard</h2><ol>";
-        items.forEach((row) => {
-          html += `<li>${row.name}: ${row.score}</li>`;
-        });
-        html += "</ol>";
-        document.getElementById("scoreboard").innerHTML = html;
-      });
-    }
+    console.log("📥 Raw snapshot data:", snapshot.val());
+
+    const items = [];
+    snapshot.forEach((child) => items.push(child.val())); // ascending order
+    items.reverse(); // highest first
+
+    console.log("✅ Processed scores:", items);
+
+    // Build H
+
 
     // Load scores on page open
     loadScores();
   </script>
 </body>
 </html>
+
