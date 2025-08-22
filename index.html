@@ -6,10 +6,8 @@
   <link rel="stylesheet" href="style.css">
   <!-- Firebase App -->
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"></script>
-
   <!-- Firebase Realtime Database -->
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js"></script>
-
 </head>
 <body>
   <h1>Ojas vs Dhruv - Quiz Game</h1>
@@ -26,7 +24,6 @@
   <div class="question-box" id="question-box" style="display:none;">
     <h2 id="question">Question will appear here</h2>
     <div>
-      <!-- Make sure these file names match your actual image files in the same folder -->
       <img id="ojas-img" src="images/ojas.jpeg" alt="Ojas">
       <img id="dhruv-img" src="images/dhruv.png" alt="Dhruv">
     </div>
@@ -47,6 +44,9 @@
     <div id="result"></div>
     <button onclick="restartGame()">Play Again</button>
   </div>
+
+  <!-- Scoreboard (placed OUTSIDE script) -->
+  <div id="scoreboard"></div>
 
   <script>
     const questions = [
@@ -91,9 +91,6 @@
       currentQuestion++;
       loadQuestion();
     }
-    
-    <div id="scoreboard"></div>
-
 
     function showResult() {
       document.getElementById("question-box").style.display = "none";
@@ -124,15 +121,13 @@
       }
 
       document.getElementById("result").innerHTML = resultText + winnerCardHTML;
-        // save Ojas score
+
+      // save Ojas score
       saveScore(playerName + " (Ojas)", scores.Ojas);
 
-        // save Dhruv score
+      // save Dhruv score
       saveScore(playerName + " (Dhruv)", scores.Dhruv);
-
-
     }
-
 
     function restartGame() {
       currentQuestion = 0;
@@ -142,6 +137,7 @@
       document.getElementById("playerName").value = "";
     }
   </script>
+
   <script>
   // Paste your firebaseConfig here
   const firebaseConfig = {
@@ -184,10 +180,7 @@
 
   // Load scores when page opens
   loadScores();
-</script>
+  </script>
 
 </body>
 </html>
-
-
-
