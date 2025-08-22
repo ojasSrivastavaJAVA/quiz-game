@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Ojas vs Dhruv Quiz Game</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background: #f4f4f9;
+    }
+    .question-box, .start-box, .result-box {
+      margin: 20px auto;
+      padding: 20px;
+      background: white;
+      width: 60%;
+      border-radius: 12px;
+      box-shadow: 0px 4px 8px rgba(0,0,0,0.1);
+    }
+    img {
+      width: 150px;
+      height: 150px;
+      border-radius: 10px;
+      object-fit: cover;
+      margin: 10px;
+    }
+    button {
+      padding: 12px 20px;
+      margin: 10px;
+      font-size: 16px;
+      cursor: pointer;
+      border: none;
+      border-radius: 8px;
+      background: #007BFF;
+      color: white;
+      transition: 0.3s;
+    }
+    button:hover {
+      background: #0056b3;
+    }
+    #result {
+      font-size: 22px;
+      font-weight: bold;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Ojas vs Dhruv - Quiz Game</h1>
+
+  <!-- Start screen -->
+  <div class="start-box" id="start-box">
+    <h2>Enter your name to start playing</h2>
+    <input type="text" id="playerName" placeholder="Your Name">
+    <br><br>
+    <button onclick="startGame()">Start Game</button>
+  </div>
+
+  <!-- Quiz questions -->
+  <div class="question-box" id="question-box" style="display:none;">
+    <h2 id="question">Question will appear here</h2>
+    <div>
+      <!-- Make sure these file names match your actual image files in the same folder -->
+      <img id="ojas-img" src="ojas.jpeg" alt="Ojas">
+      <img id="dhruv-img" src="dhruv.png" alt="Dhruv">
+    </div>
+    <div>
+      <button onclick="vote('Ojas')">Vote OJAS</button>
+      <button onclick="vote('Dhruv')">Vote DHRUV</button>
+    </div>
+    <p id="progress"></p>
+  </div>
+
+  <!-- Result screen -->
+  <div class="result-box" id="result-box" style="display:none;">
+    <h2>Results</h2>
+    <div>
+      <img id="ojas-final" src="ojas.jpeg" alt="Ojas">
+      <img id="dhruv-final" src="dhruv.png" alt="Dhruv">
+    </div>
+    <div id="result"></div>
+    <button onclick="restartGame()">Play Again</button>
+  </div>
+
+  <script>
+    const questions = [
+      "Who looks better?",
+      "Who is smarter?",
+      "Who is taller?",
+      "Who is funnier?",
+      "Who is more hardworking?",
+      "Who is more confident?",
+      "Who is better at sports?",
+      "Who is more creative?",
+      "Who has a better smile?",
+      "Who would you trust more?"
+    ];
+
+    let currentQuestion = 0;
+    let scores = { Ojas: 0, Dhruv: 0 };
+    let playerName = "";
+
+    function startGame() {
+      playerName = document.getElementById("playerName").value.trim();
+      if (!playerName) {
+        alert("Please enter your name to start!");
+        return;
+      }
+      document.getElementById("start-box").style.display = "none";
+      document.getElementById("question-box").style.display = "block";
+      loadQuestion();
+    }
+
+    function loadQuestion() {
+      if (currentQuestion < questions.length) {
+        document.getElementById("question").innerText = questions[currentQuestion];
+        document.getElementById("progress").innerText = `${playerName}, Question ${currentQuestion+1} of ${questions.length}`;
+      } else {
+        showResult();
+      }
+    }
+
+    function vote(person) {
+      scores[person]++;
+      currentQuestion++;
+      loadQuestion();
+    }
+
+    function showResult() {
+      document.getElementById("question-box").style.display = "none";
+      document.getElementById("result-box").style.display = "block";
+
+      let resultText = `${playerName}, here are the final scores:<br><br>`;
+      resultText += `OJAS: ${scores.Ojas}<br>DHRUV: ${scores.Dhruv}<br><br>`;
+
+      if (scores.Ojas > scores.Dhruv) {
+        resultText += "🏆 OJAS Wins!";
+      } else if (scores.Dhruv > scores.Ojas) {
+        resultText += "🏆 DHRUV Wins!";
+      } else {
+        resultText += "🤝 It's a Tie!";
+      }
+
+      document.getElementById("result").innerHTML = resultText;
+    }
+
+    function restartGame() {
+      currentQuestion = 0;
+      scores = { Ojas: 0, Dhruv: 0 };
+      document.getElementById("result-box").style.display = "none";
+      document.getElementById("start-box").style.display = "block";
+      document.getElementById("playerName").value = "";
+    }
+  </script>
+</body>
+</html>
