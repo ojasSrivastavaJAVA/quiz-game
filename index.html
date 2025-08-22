@@ -25,6 +25,34 @@
       object-fit: cover;
       margin: 10px;
     }
+    .winner-card {
+      margin: 20px auto;
+      padding: 20px;
+      width: 300px;
+      background: linear-gradient(135deg, #ffcc00, #ff9900);
+      border-radius: 16px;
+      box-shadow: 0px 6px 12px rgba(0,0,0,0.2);
+      color: white;
+      font-size: 20px;
+      font-weight: bold;
+      text-align: center;
+      animation: pop 0.6s ease-out;
+    }
+
+    .winner-card img {
+      width: 150px;
+      height: 150px;
+      border-radius: 12px;
+      object-fit: cover;
+      margin-bottom: 10px;
+      border: 4px solid white;
+    }
+
+    @keyframes pop {
+      0% { transform: scale(0.5); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
     button {
       padding: 12px 20px;
       margin: 10px;
@@ -134,16 +162,30 @@
       let resultText = `${playerName}, here are the final scores:<br><br>`;
       resultText += `OJAS: ${scores.Ojas}<br>DHRUV: ${scores.Dhruv}<br><br>`;
 
+      let winnerCardHTML = "";
+
       if (scores.Ojas > scores.Dhruv) {
-        resultText += "🏆 OJAS Wins!";
+        winnerCardHTML = `
+          <div class="winner-card">
+            <img src="ojas.png" alt="Ojas">
+            🏆 OJAS Wins!
+          </div>`;
       } else if (scores.Dhruv > scores.Ojas) {
-        resultText += "🏆 DHRUV Wins!";
+        winnerCardHTML = `
+          <div class="winner-card">
+            <img src="dhruv.png" alt="Dhruv">
+            🏆 DHRUV Wins!
+          </div>`;
       } else {
-        resultText += "🤝 It's a Tie!";
+        winnerCardHTML = `
+          <div class="winner-card" style="background: #555;">
+            🤝 It's a Tie!
+          </div>`;
       }
 
-      document.getElementById("result").innerHTML = resultText;
+      document.getElementById("result").innerHTML = resultText + winnerCardHTML;
     }
+
 
     function restartGame() {
       currentQuestion = 0;
@@ -155,5 +197,6 @@
   </script>
 </body>
 </html>
+
 
 
