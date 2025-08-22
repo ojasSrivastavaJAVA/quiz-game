@@ -155,34 +155,62 @@
     }
 
     function loadScores() {
-      db.ref("scores").get().then(snapshot => {
-        if (!snapshot.exists()) {
-          document.getElementById("scoreboard").innerHTML = "<p>No scores yet</p>";
-          return;
-        }
-
-        const items = [];
-        snapshot.forEach(child => {
-          const val = child.val();
-          if (val && typeof val.score === "number") items.push(val);
-        });
-
-        // Sort descending and take top 10
-        items.sort((a,b) => b.score - a.score);
-        const top10 = items.slice(0,10);
-
-        let html = "<h2>🏆 Scoreboard - Top 10</h2><ol>";
-        top10.forEach(item => {
-          html += `<li>${item.name}: ${item.score}</li>`;
-        });
-        html += "</ol>";
-
-        document.getElementById("scoreboard").innerHTML = html;
-      }).catch(err => console.error("Error loading scores:", err));
+  db.ref("scores").get().then(snapshot => {
+    if (!snapshot.exists()) {
+      document.getElementById("scoreboard").innerHTML = "<p>No scores yet</p>";
+      return;
     }
+
+    const items = [];
+    snapshot.forEach(child => {
+      const val = child.val();
+      if (val && typeof val.score === "number" && val.name) items.push(val);
+    });
+
+    // Separate scores by player
+    const playerScores = {};
+    items.forEach(item => {
+      // Extract player name and who (Ojas/Dhruv) from saved name
+      const match = item.name.match(/(.+)\s\((Ojas|Dhruv)\)$/);
+      if (!match) return;
+      const player = match[1];
+      const who = match[2];
+
+      if (!playerScores[player]) playerScores[player] = { Ojas: 0, Dhruv: 0 };
+      playerScores[player][who] = item.score;
+    });
+
+    // Build table
+    let html = `<h2>🏆 Scoreboard</h2>`;
+    html += `<table border="1" cellpadding="5" cellspacing="0">
+              <tr>
+                <th>Player</th>
+                <th>Ojas</th>
+                <th>Dhruv</th>
+              </tr>`;
+
+    // Sort players alphabetically or by total score
+    const sortedPlayers = Object.keys(playerScores);
+    sortedPlayers.forEach(player => {
+      const ojasScore = playerScores[player].Ojas || 0;
+      const dhruvScore = playerScores[player].Dhruv || 0;
+      html += `<tr>
+                 <td>${player}</td>
+                 <td>${ojasScore}</td>
+                 <td>${dhruvScore}</td>
+               </tr>`;
+    });
+
+    html += `</table>`;
+
+    document.getElementById("scoreboard").innerHTML = html;
+  }).catch(err => console.error("Error loading scores:", err));
+}
+
 
     // Load scoreboard on page load
     window.addEventListener("load", loadScores);
   </script>
 </body>
 </html>
+
