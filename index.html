@@ -157,7 +157,7 @@
     function loadScores() {
   db.ref("scores").get().then(snapshot => {
     if (!snapshot.exists()) {
-      document.getElementById("scoreboard").innerHTML = "<p>No scores yet</p>";
+      document.getElementById("scoreboard").innerHTML = "<p style='text-align:center;'>No scores yet</p>";
       return;
     }
 
@@ -170,7 +170,6 @@
     // Separate scores by player
     const playerScores = {};
     items.forEach(item => {
-      // Extract player name and who (Ojas/Dhruv) from saved name
       const match = item.name.match(/(.+)\s\((Ojas|Dhruv)\)$/);
       if (!match) return;
       const player = match[1];
@@ -181,15 +180,14 @@
     });
 
     // Build table
-    let html = `<h2>🏆 Scoreboard</h2>`;
-    html += `<table border="1" cellpadding="5" cellspacing="0">
+    let html = `<h2 style="text-align:center;">🏆 Scoreboard</h2>`;
+    html += `<table style="margin:auto; font-size:18px; text-align:center; border-collapse: collapse;">
               <tr>
                 <th>Player</th>
                 <th>Ojas</th>
                 <th>Dhruv</th>
               </tr>`;
 
-    // Sort players alphabetically or by total score
     const sortedPlayers = Object.keys(playerScores);
     sortedPlayers.forEach(player => {
       const ojasScore = playerScores[player].Ojas || 0;
@@ -213,4 +211,5 @@
   </script>
 </body>
 </html>
+
 
